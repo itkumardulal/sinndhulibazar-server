@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Order Management</title>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+      background-color: #f9f9f9;
+    }
+    h1, h2, h3 {
+      color: #333;
+    }
+    form input, button {
+      display: block;
+      margin: 10px 0;
+      padding: 8px;
+      font-size: 14px;
+      width: 100%;
+      max-width: 400px;
+    }
+    #itemsContainer {
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+    .item {
+      margin-bottom: 10px;
+    }
+    button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+      width: auto;
+      padding: 10px 20px;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    pre {
+      background: #f0f0f0;
+      padding: 10px;
+      max-height: 300px;
+      overflow: auto;
+      white-space: pre-wrap;
+      border: 1px solid #ccc;
+    }
+    .order-item {
+      background: #fff;
+      border: 1px solid #ddd;
+      padding: 10px;
+      margin-bottom: 8px;
+      border-radius: 4px;
+    }
+    .order-item button {
+      background-color: #dc3545;
+      margin-left: 10px;
+    }
+    .order-item button:hover {
+      background-color: #c82333;
+    }
+  </style>
+</head>
+<body>
+  <h1>Create Gift Order</h1>
+  <form id="orderForm">
+    <input type="text" id="senderName" placeholder="Sender Name" required />
+    <input type="text" id="senderPhone" placeholder="Sender Phone" required />
+    <input type="text" id="receiverName" placeholder="Receiver Name" required />
+    <input type="text" id="receiverPhone" placeholder="Receiver Phone" required />
+    <input type="text" id="relationship" placeholder="Relationship (e.g., Friend, Sister)" required />
+    <input type="text" id="message" placeholder="Message" />
+    <input type="text" id="occasion" placeholder="Occasion" />
+
+    <div id="itemsContainer">
+      <h3>Gift Items</h3>
+      <div class="item">
+        <input type="text" class="itemName" placeholder="Item Name" required />
+        <input type="number" class="itemQty" placeholder="Quantity" required />
+        <input type="number" class="itemPrice" placeholder="Price" required />
+      </div>
+    </div>
+    <button type="button" id="addItem">+ Add Item</button>
+
+    <input type="number" id="deliveryCharge" placeholder="Delivery Charge" />
+    <input type="number" id="totalPrice" placeholder="Total Price" required />
+
+    <button type="submit">Submit Order</button>
+  </form>
+
+  <hr />
+
+  <h2>All Orders</h2>
+  <ul id="ordersList"></ul>
+
+  <hr />
+
+  <h2>Get Order By ID</h2>
+  <input type="text" id="orderIdInput" placeholder="Enter Order ID" />
+  <button id="fetchOrderBtn">Fetch Order</button>
+
+  <h3>Order Details</h3>
+  <pre id="orderDetails"></pre>
+
+  <script>
+    const API_URL = "http://localhost:5000/api/order";
+
+    // Add more item input fields
+    $('#addItem').click(function () {
+      $('#itemsContainer').append(`
+        <div class="item">
+          <input type="text" class="itemName" placeholder="Item Name" required />
+          <input type="number" class="itemQty" placeholder="Quantity" required />
+          <input type="number" class="itemPrice" placeholder="Price" required />
+        </div>
+      `);
+    });
+
+    // Fetch and display all orders with their items
+function fetchOrders() {
+  $.get(`${API_URL}/allorders`, function (data) {
+    const groupedOrders = {};
+
+    // Step 1: Group rows by order_id
+    data.forEach(row => {
+      const id = row.order_id;
+
+      if (!groupedOrders[id]) {
+        groupedOrders[id] = {
+          id: id,
+          senderName: row.sender_name || 'Secret Person',
+          senderPhone: row.sender_phone || 'N/A',
+          receiverName: row.receiver_name || 'Secret Person',
+          receiverPhone: row.receiver_phone || 'N/A',
+          relationship: row.relationship || 'N/A',
+          message: row.sender_message || 'No message',
+          occasion: row.occasion || 'N/A',
+          itemsOrdered: []
+        };
+      }
+
+      // Add item if exists
+      if (row.item_name) {
+        groupedOrders[id].itemsOrdered.push({
+          name: row.item_name,
+          quantity: row.quantity,
+          price: row.price
+        });
+      }
+    });
+
+    // Step 2: Render to HTML
+    const orders = Object.values(groupedOrders);
+    $('#ordersList').empty();
+
+    orders.forEach(order => {
+      const itemsHtml = order.itemsOrdered.length > 0
+        ? order.itemsOrdered.map(item => ` 
+            <div style="padding-left:15px; margin-bottom:4px;">
+              <strong>Item:</strong> ${item.name} | 
+              <strong>Qty:</strong> ${item.quantity} | 
+              <strong>Price:</strong> ₹${item.price.toFixed(2)}
+            </div>
+          `).join('')
+        : '<div style="padding-left:15px;">No items ordered</div>';
+
+      $('#ordersList').append(`
+        <li class="order-item">
+          <strong>Order ID:</strong> ${order.id}<br>
+          <strong>Sender:</strong> ${order.senderName} (${order.senderPhone})<br>
+          <strong>Receiver:</strong> ${order.receiverName} (${order.receiverPhone})<br>
+          <em>Relationship:</em> ${order.relationship}<br>
+          <strong>Message:</strong> ${order.message}<br>
+          <strong>Occasion:</strong> ${order.occasion}<br>
+          <strong>Items Ordered:</strong><br>
+          ${itemsHtml}
+          <button onclick="deleteOrder('${order.id}')">Delete</button>
+        </li>
+      `);
+    });
+  }).fail(() => {
+    $('#ordersList').empty().append('<li>Error fetching orders.</li>');
+  });
+}
+
+
+    // Submit new order
+    $('#orderForm').submit(function (e) {
+      e.preventDefault();
+
+      const items = [];
+      $('.item').each(function () {
+        const name = $(this).find('.itemName').val();
+        const quantity = parseInt($(this).find('.itemQty').val());
+        const price = parseFloat($(this).find('.itemPrice').val());
+        items.push({ name, quantity, price });
+      });
+
+      const orderData = {
+        senderName: $('#senderName').val(),
+        senderPhone: $('#senderPhone').val(),
+        receiverName: $('#receiverName').val(),
+        receiverPhone: $('#receiverPhone').val(),
+        relationship: $('#relationship').val(),
+        message: $('#message').val(),
+        occasion: $('#occasion').val(),
+        itemsOrdered: items,
+        deliveryCharge: parseFloat($('#deliveryCharge').val() || 0),
+        totalPrice: parseFloat($('#totalPrice').val())
+      };
+
+      $.ajax({
+        url: API_URL/create_order,
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(orderData),
+        success: function (response) {
+          alert("Order created! Order ID: " + response.orderId);
+          $('#orderForm')[0].reset();
+          $('#itemsContainer').html(`
+            <div class="item">
+              <input type="text" class="itemName" placeholder="Item Name" required />
+              <input type="number" class="itemQty" placeholder="Quantity" required />
+              <input type="number" class="itemPrice" placeholder="Price" required />
+            </div>
+          `);
+          $('#orderIdInput').val(response.orderId);
+          fetchOrders();
+        },
+        error: function () {
+          alert("Error creating order.");
+        }
+      });
+    });
+
+
+
+    // Fetch single order by ID
+    $('#fetchOrderBtn').click(function () {
+      const orderId = $('#orderIdInput').val().trim();
+      if (!orderId) {
+        alert("Please enter an Order ID.");
+        return;
+      }
+      $.get(`${API_URL}/${orderId}`, function (order) {
+        $('#orderDetails').text(JSON.stringify(order, null, 2));
+      }).fail(function (xhr) {
+        if (xhr.status === 404) {
+          alert("Order not found!");
+        } else {
+          alert("Error fetching order.");
+        }
+        $('#orderDetails').text('');
+      });
+    });
+
+    $(document).ready(fetchOrders);
+  </script>
+</body>
+</html>

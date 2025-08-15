@@ -1,0 +1,27 @@
+{
+  "xyz123": {
+    "expiresAt": "2025-09-06T10:00:00Z",
+    "data": {
+      "sender": { "name": "Kumar", "phone": "+97790000" },
+      "receiver": { "name": "Sita", "phone": "+97799999" },
+      "occasion": "Tihar",
+      "senderMessage": "Wishing you a bright and happy Tihar!",
+      "orderItems": [
+        { "name": "Chocolate Box", "qty": 1 },
+        { "name": "Greeting Card", "qty": 2 }
+      ]
+    }
+  },
+  "abc789": {
+    "expiresAt": "2025-09-10T08:00:00Z",
+    "data": {
+      "sender": { "name": "Alice", "phone": "+97712345" },
+      "receiver": { "name": "Bob", "phone": "+97754321" },
+      "occasion": "Anniversary",
+      "senderMessage": "Happy Anniversary!",
+      "orderItems": [
+        { "name": "Flower", "qty": 1 }
+      ]
+    }
+  }
+}
