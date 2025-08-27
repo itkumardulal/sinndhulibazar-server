@@ -1,25 +1,24 @@
-const db = require('../config/db');
-const { v4: uuidv4 } = require('uuid');
+const db = require("../config/db");
+const { v4: uuidv4 } = require("uuid");
 
-exports.createOrderModel = async (orderData) =>{
+exports.createOrderModel = async (orderData) => {
   const {
     senderName,
     senderPhone,
     receiverName,
     receiverPhone,
     receiverGender,
-     receiverAgeGroup,
+    receiverAgeGroup,
     relationship,
     message,
     occasion,
 
     deliveryCharge,
     totalPrice,
-        itemsOrdered, // [{ name, price, quantity }]
-        giftRange,
-        giftCost
-        
-    
+    itemsOrdered, // [{ name, price, quantity }]
+
+    giftRange,
+    giftCost,
   } = orderData;
 
   const orderId = uuidv4();
@@ -32,7 +31,7 @@ exports.createOrderModel = async (orderData) =>{
     // Insert into orders table
     await connection.execute(
       `INSERT INTO orders 
-      (id, sender_name, sender_phone, receiver_name, receiver_phone,receiver_gender, receiver_age_group, relationship, message, occasion, delivery_charge, total_price,giftRange,giftCost)
+      (id, sender_name, sender_phone, receiver_name, receiver_phone,receiver_gender, receiver_age_group, relationship, message, occasion, delivery_charge, total_price,gift_Range,gift_Cost)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?)`,
       [
         orderId,
@@ -45,12 +44,11 @@ exports.createOrderModel = async (orderData) =>{
         relationship,
         message,
         occasion,
-      
+
         deliveryCharge,
         totalPrice,
         giftRange,
-        giftCost
-        
+        giftCost,
       ]
     );
 

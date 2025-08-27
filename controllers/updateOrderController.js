@@ -1,28 +1,28 @@
-const { updateOrder } = require('../models/updateOrderModel');
+const { updateOrderById } = require("../models/updateOrderModel");
 
 exports.updateOrderController = async (req, res) => {
   try {
-    const { id } = req.params;
-    const updatedFields = req.body;
-    console.log("jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj",id)
+    const { id } = req.params;           // order ID from URL
+    const { gift_item } = req.body;      // expected field
 
     if (!id) {
-      return res.status(400).json({ error: 'Order ID is required' });
+      return res.status(400).json({ error: "Order ID is required" });
     }
 
-    if (!updatedFields || Object.keys(updatedFields).length === 0) {
-      return res.status(400).json({ error: 'No fields provided for update' });
+    if (!gift_item) {
+      return res.status(400).json({ error: "gift_item is required" });
     }
 
-    const result = await updateOrder(id, updatedFields);
+    const result = await updateOrderById(id, { gift_item });
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'Order not found' });
+    if (!result.success) {
+      // Could be already claimed or order not found
+      return res.status(400).json({ message: result.message });
     }
 
-    res.json({ message: 'Order updated successfully' });
+    return res.json({ message: "Gift updated successfully", orderId: id });
   } catch (error) {
-    console.error('Error updating order:', error);
-    res.status(500).json({ error: error.message || 'Failed to update order' });
+    console.error("Error updating gift:", error);
+    return res.status(500).json({ error: error.message || "Failed to update gift" });
   }
 };
