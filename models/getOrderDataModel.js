@@ -58,20 +58,23 @@ exports.getOrderDataById = async (id) => {
     //   createdAt: order.created_at,
     //   giftRange:order.giftRange
     // };
-    const response = {
+const response = {
   id: order.id,
   senderName: order.sender_name,
   senderPhone: order.sender_phone,
   receiverName: order.receiver_name,
   receiverPhone: order.receiver_phone,
-  receiverAgeGroup: order.receiver_age_group, // NEW
-  receiverGender: order.receiver_gender,      // NEW
+  receiverGender: order.receiver_gender,
+  receiverAgeGroup: order.receiver_age_group,
   relationship: order.relationship,
   message: order.message,
   occasion: order.occasion,
-  itemsOrdered: itemsRows,
+  itemsOrdered: itemsRows,       // from order_items table
   deliveryCharge: order.delivery_charge,
   totalPrice: order.total_price,
+  giftRange: order.gift_range,   // correct
+  giftCost: order.gift_cost,     // correct
+  giftItem: order.gift_item,     // added
   claimed: Boolean(order.claimed),
   deliveryStatus: {
     delivered: Boolean(order.delivery_delivered),
@@ -80,10 +83,9 @@ exports.getOrderDataById = async (id) => {
   whatsappTries: order.whatsapp_tries,
   whatsappBlocked: Boolean(order.whatsapp_blocked),
   claimedAt: order.claimed_at || null,
-  createdAt: order.created_at,
-  giftRange: order.giftRange,
-  giftCost:order.giftCost
+  createdAt: order.created_at
 };
+
 
 
     // console.log("✅ Step 4: Final Response:", response);
