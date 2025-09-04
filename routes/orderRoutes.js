@@ -5,6 +5,7 @@ const createOrderController = require("../controllers/createOrderController");
 // const updateOrderController = require('../controllers/updateOrderController');
 const {
   getOrderbyIdController,
+  getAllOrders,
 } = require("../controllers/getOrderbyIdController");
 
 const {
@@ -15,6 +16,7 @@ const {
 router.post("/create_order", createOrderController.createOrderController);
 
 router.get("/getGiftData/:id", getOrderbyIdController);
+router.get("/getAllOrders", getAllOrders);
 router.patch("/updateGiftWin/:id", updateOrderController);
 
 module.exports = router;
